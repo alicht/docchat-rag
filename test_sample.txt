@@ -1,0 +1,33 @@
+Machine Learning Fundamentals
+
+Machine learning is a method of data analysis that automates analytical model building. It is a branch of artificial intelligence (AI) based on the idea that systems can learn from data, identify patterns and make decisions with minimal human intervention.
+
+Types of Machine Learning:
+
+1. Supervised Learning
+Supervised learning uses labeled training data to learn a mapping function from input variables to output variables. Common algorithms include:
+- Linear Regression
+- Logistic Regression  
+- Decision Trees
+- Random Forest
+- Support Vector Machines
+
+2. Unsupervised Learning
+Unsupervised learning finds hidden patterns in data without labeled examples. Popular techniques include:
+- K-Means Clustering
+- Hierarchical Clustering
+- Principal Component Analysis (PCA)
+- Association Rules
+
+3. Reinforcement Learning
+Reinforcement learning is about taking suitable action to maximize reward in a particular situation. It employs trial and error to come up with a solution to the problem.
+
+Applications of Machine Learning:
+- Image Recognition
+- Natural Language Processing
+- Recommendation Systems
+- Autonomous Vehicles
+- Medical Diagnosis
+- Financial Trading
+
+This document provides a basic overview of machine learning concepts for educational purposes.
