@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
 
@@ -27,3 +28,13 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+class AskRequest(BaseModel):
+    question: str
+
+class AskResponse(BaseModel):
+    answer: str
+
+@app.post("/ask", response_model=AskResponse)
+async def ask_question(request: AskRequest):
+    return AskResponse(answer="Hello from backend")

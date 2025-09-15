@@ -4,7 +4,10 @@
       "Bash(mkdir:*)",
       "Bash(npm create:*)",
       "Bash(npm init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(python -m pytest tests/test_main.py -v)"
     ],
     "deny": [],
     "ask": []
