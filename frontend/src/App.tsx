@@ -3,7 +3,20 @@ import DocumentUploader from './components/DocumentUploader'
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      {/* Header Bar */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center space-x-3">
+            <div className="text-2xl">📚</div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">DocChat RAG</h1>
+              <p className="text-sm text-gray-600">Chat with your documents</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
       <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Chat Area */}

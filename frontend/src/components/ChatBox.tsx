@@ -83,8 +83,8 @@ function ChatBox() {
   }
 
   return (
-    <div className="bg-white shadow-lg rounded-lg overflow-hidden h-full">
-          <div className="bg-blue-600 text-white p-4">
+    <div className="bg-white shadow-lg rounded-lg overflow-hidden h-full flex flex-col">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 shadow-sm">
             <h1 className="text-2xl font-bold text-center">
               DocChat RAG Assistant
             </h1>
@@ -94,7 +94,7 @@ function ChatBox() {
           </div>
           
           {/* Messages Container */}
-          <div className="h-96 overflow-y-auto p-4 space-y-4 bg-gray-50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 scroll-smooth" style={{ minHeight: '400px', maxHeight: '500px' }}>
             {messages.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-gray-400 text-6xl mb-4">💬</div>
@@ -113,10 +113,10 @@ function ChatBox() {
                     className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg shadow-sm ${
+                      className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm ${
                         message.type === 'user'
-                          ? 'bg-blue-600 text-white rounded-br-none'
-                          : 'bg-white text-gray-800 rounded-bl-none border'
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-br-md'
+                          : 'bg-white text-gray-800 rounded-bl-md border border-gray-200'
                       }`}
                     >
                       <div className="whitespace-pre-wrap">{message.content}</div>
@@ -155,12 +155,12 @@ function ChatBox() {
                 {/* Loading indicator */}
                 {loading && (
                   <div className="flex justify-start">
-                    <div className="bg-white text-gray-800 rounded-lg rounded-bl-none border px-4 py-3 shadow-sm">
+                    <div className="bg-white text-gray-800 rounded-2xl rounded-bl-md border border-gray-200 px-4 py-3 shadow-sm">
                       <div className="flex items-center space-x-2">
                         <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                         </div>
                         <span className="text-sm text-gray-500">Thinking...</span>
                       </div>
@@ -173,21 +173,21 @@ function ChatBox() {
             )}
           </div>
 
-          {/* Input Form */}
-          <div className="bg-white border-t p-4">
+          {/* Input Form - Sticky at bottom */}
+          <div className="bg-white border-t border-gray-200 p-4 shadow-lg">
             <form onSubmit={handleSubmit} className="flex gap-3">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask a question about your documents..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 disabled={loading}
               />
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
-                className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium rounded-full hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105"
               >
                 {loading ? (
                   <div className="flex items-center space-x-2">
