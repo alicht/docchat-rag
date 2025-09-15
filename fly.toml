@@ -1,0 +1,32 @@
+# fly.toml app configuration file
+app = "docchat-rag-unique-name"
+primary_region = "ord"
+
+[build]
+  dockerfile = "backend/Dockerfile"
+
+[env]
+  PORT = "8080"
+  PYTHONPATH = "/app"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+
+  [[http_service.checks]]
+    interval = "10s"
+    grace_period = "5s"
+    method = "GET"
+    path = "/health"
+    protocol = "http"
+    timeout = "2s"
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 8080
+  ports = [
+    { port = 80, handlers = ["http"] },
+    { port = 443, handlers = ["tls", "http"] }
+  ]
