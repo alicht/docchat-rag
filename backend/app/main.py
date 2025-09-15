@@ -7,6 +7,7 @@ import logging
 
 from app.routes import documents, chat
 from app.services.vector_store import VectorStoreService
+from app.services.llm import LLMService
 
 load_dotenv()
 
@@ -18,6 +19,7 @@ app = FastAPI(title="DocChat RAG API", version="1.0.0")
 
 # Initialize services
 vector_store = VectorStoreService()
+llm_service = LLMService()
 
 app.add_middleware(
     CORSMiddleware,
@@ -43,10 +45,71 @@ class AskRequest(BaseModel):
 
 class AskResponse(BaseModel):
     answer: str
+    sources: list = []
 
 @app.post("/ask", response_model=AskResponse)
 async def ask_question(request: AskRequest):
-    return AskResponse(answer="Hello from backend")
+    """
+    Answer questions using RAG (Retrieval-Augmented Generation)
+    """
+    try:
+        logger.info(f"Processing question: {request.question}")
+        
+        # Search for relevant document chunks
+        relevant_chunks = await vector_store.search(
+            query=request.question,
+            top_k=5
+        )
+        
+        if not relevant_chunks:
+            logger.warning("No documents found in ChromaDB")
+            return AskResponse(
+                answer="No documents found. Please upload some documents first to ask questions about them.",
+                sources=[]
+            )
+        
+        # Log retrieved chunks for debugging
+        logger.info(f"Retrieved {len(relevant_chunks)} chunks:")
+        for i, chunk in enumerate(relevant_chunks):
+            metadata = chunk.get("metadata", {})
+            logger.info(f"  Chunk {i+1}: {metadata.get('filename', 'Unknown')} "
+                       f"(chunk {metadata.get('chunk_index', 'N/A')}) "
+                       f"- distance: {chunk.get('distance', 'N/A')}")
+        
+        # Construct context from chunks
+        context_parts = []
+        sources = []
+        
+        for chunk in relevant_chunks:
+            context_parts.append(chunk["text"])
+            metadata = chunk.get("metadata", {})
+            sources.append({
+                "filename": metadata.get("filename", "Unknown"),
+                "chunk_index": metadata.get("chunk_index", 0),
+                "distance": chunk.get("distance")
+            })
+        
+        context = "\n\n".join(context_parts)
+        
+        # Generate response using LLM
+        answer = await llm_service.generate_response(
+            query=request.question,
+            context=context
+        )
+        
+        logger.info(f"Generated answer of length: {len(answer)}")
+        
+        return AskResponse(
+            answer=answer,
+            sources=sources
+        )
+        
+    except Exception as e:
+        logger.error(f"Error in RAG pipeline: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail="Error processing your question. Please try again."
+        )
 
 class UploadResponse(BaseModel):
     message: str
