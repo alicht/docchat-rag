@@ -28,12 +28,9 @@ COPY . .
 # Create data directory for ChromaDB persistence
 RUN mkdir -p /app/data
 
-# Expose port (Railway will set PORT env var)
-EXPOSE $PORT
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:$PORT/health || exit 1
+# Expose port 
+EXPOSE 8000
 
 # Change to backend directory and run the application
-CMD cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+# Railway sets PORT env var, default to 8000 if not set
+CMD cd backend && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
