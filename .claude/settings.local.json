@@ -10,7 +10,11 @@
       "Bash(python -m pytest tests/test_main.py -v)",
       "Bash(lsof:*)",
       "Bash(python:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(curl:*)",
+      "Bash(uvicorn:*)",
+      "Bash(PYTHONPATH=/Users/AviNew/docchat-rag/backend uvicorn app.main:app --reload --port 8000 --host 0.0.0.0)",
+      "Bash(chmod:*)"
     ],
     "deny": [],
     "ask": []
