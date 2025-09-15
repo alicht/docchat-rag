@@ -37,6 +37,12 @@ Edit `.env` and add your OpenAI API key:
 OPENAI_API_KEY=your-api-key-here
 ```
 
+**Important**: You need a valid OpenAI API key for:
+- Text embeddings generation (text-embedding-3-small)
+- Chat completions (GPT-4o-mini)
+
+Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
+
 ### 3. Backend Setup
 
 ```bash
@@ -115,10 +121,12 @@ docchat-rag/
 
 - `GET /` - Health check
 - `GET /health` - API health status
-- `POST /api/documents/upload` - Upload a document
+- `POST /ask` - Simple chat endpoint (returns dummy response)
+- `POST /upload-doc` - Upload PDF/TXT document for RAG processing
+- `POST /api/documents/upload` - Upload a document (legacy)
 - `GET /api/documents/` - List all documents
 - `DELETE /api/documents/{id}` - Delete a document
-- `POST /api/chat/` - Send a chat message
+- `POST /api/chat/` - Send a chat message with RAG context
 
 ## Development
 
