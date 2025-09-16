@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Bars3Icon } from '@heroicons/react/24/outline'
 import ChatBox from './components/ChatBox'
 import DocumentUploader from './components/DocumentUploader'
 import TopicBrowser from './components/TopicBrowser'
@@ -24,15 +23,15 @@ function App() {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                  className="lg:hidden p-2 rounded-md hover:bg-gray-100"
+                  className="md:hidden px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
                 >
-                  <Bars3Icon className="w-6 h-6" />
+                  📑 Topics
                 </button>
                 <button
                   onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                  className="hidden lg:block p-2 rounded-md hover:bg-gray-100"
+                  className="hidden md:block px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
                 >
-                  <Bars3Icon className="w-5 h-5" />
+                  📑 Topics
                 </button>
                 <div className="text-2xl">📚</div>
                 <div>

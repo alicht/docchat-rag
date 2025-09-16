@@ -15,7 +15,8 @@
       "Bash(uvicorn:*)",
       "Bash(PYTHONPATH=/Users/AviNew/docchat-rag/backend uvicorn app.main:app --reload --port 8000 --host 0.0.0.0)",
       "Bash(chmod:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []
