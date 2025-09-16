@@ -4,13 +4,11 @@ import { config } from '../config'
 
 interface Source {
   filename: string
-  chunk_id: number
-  score: number
-  preview: string
+  topic?: string | null
   page?: number | null
   line?: number | null
-  topic?: string | null
-  doc_url?: string | null
+  preview: string
+  score: number
 }
 
 interface ChatMessage {
@@ -130,71 +128,55 @@ function ChatBox() {
                       {message.type === 'ai' && message.sources && message.sources.length > 0 && (
                         <div className="mt-4">
                           <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                            <span className="w-4 h-4 mr-2">📄</span>
+                            <span className="w-4 h-4 mr-2">📚</span>
                             Sources ({message.sources.length})
                           </p>
                           <div className="space-y-3">
                             {message.sources.map((source, index) => (
                               <div 
                                 key={index} 
-                                className="bg-gray-50 border border-gray-200 rounded-lg p-3 hover:bg-gray-100 transition-colors duration-200 hover:border-gray-300"
+                                className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200 hover:border-gray-300"
                               >
-                                <div className="flex items-start justify-between mb-2">
+                                {/* Header with filename and score */}
+                                <div className="flex items-start justify-between mb-3">
                                   <div className="flex-1">
-                                    {/* Topic label if available */}
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="text-gray-400">📄</span>
+                                      <span className="font-bold text-gray-900 text-sm">
+                                        {source.filename}
+                                      </span>
+                                    </div>
+                                    
+                                    {/* Topic if present */}
                                     {source.topic && (
-                                      <div className="mb-1">
-                                        <span className="text-sm font-bold text-indigo-600">
-                                          {source.topic}
-                                        </span>
+                                      <div className="text-sm font-semibold text-indigo-600 mb-1">
+                                        {source.topic}
                                       </div>
                                     )}
                                     
-                                    {source.doc_url ? (
-                                      <a 
-                                        href={source.doc_url} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="font-semibold text-blue-600 hover:text-blue-800 hover:underline text-sm"
-                                      >
-                                        {source.filename}
-                                      </a>
-                                    ) : (
-                                      <span className="font-semibold text-gray-800 text-sm">
-                                        {source.filename}
-                                      </span>
-                                    )}
-                                    
-                                    {/* Page and line info if available */}
+                                    {/* Page and line info */}
                                     {(source.page || source.line) && (
-                                      <div className="text-xs text-gray-500 mt-1">
+                                      <div className="text-xs text-gray-500">
+                                        (
                                         {source.page && <span>Page {source.page}</span>}
                                         {source.page && source.line && <span>, </span>}
                                         {source.line && <span>Line {source.line}</span>}
+                                        )
                                       </div>
                                     )}
                                   </div>
-                                  <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
+                                  
+                                  {/* Score badge */}
+                                  <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
                                     {source.score.toFixed(1)}% match
                                   </span>
                                 </div>
                                 
-                                <p className="text-xs text-gray-600 leading-relaxed mb-2">
-                                  {source.preview.length > 150 
-                                    ? source.preview.substring(0, 150) + "..." 
-                                    : source.preview
-                                  }
-                                </p>
-                                
-                                <div className="flex items-center gap-2 text-xs text-gray-400">
-                                  <span className="bg-gray-200 px-2 py-1 rounded text-xs">
-                                    Chunk {source.chunk_id}
-                                  </span>
-                                  {source.topic && (
-                                    <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs">
-                                      Topic Reference
-                                    </span>
-                                  )}
+                                {/* Preview snippet */}
+                                <div className="border-l-2 border-gray-200 pl-3">
+                                  <p className="text-sm text-gray-600 leading-relaxed italic">
+                                    "{source.preview}"
+                                  </p>
                                 </div>
                               </div>
                             ))}
