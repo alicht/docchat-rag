@@ -5,6 +5,7 @@ from typing import List, Optional
 from dotenv import load_dotenv
 import os
 import logging
+import re
 
 from app.routes import documents, chat
 from app.services.vector_store import VectorStoreService
@@ -66,11 +67,47 @@ async def ask_question(request: AskRequest):
     try:
         logger.info(f"Processing question: {request.question}")
         
-        # Search for relevant document chunks
+        # Get MAX_RESULTS from environment, default to 1
+        max_results = int(os.getenv("MAX_RESULTS", "1"))
+        
+        # Check if query matches Topic X-Y pattern
+        topic_pattern = re.compile(r'Topic\s+(\d+)-(\d+)', re.IGNORECASE)
+        topic_match = topic_pattern.search(request.question)
+        
+        # Log retrieval configuration
+        if topic_match:
+            topic_label = f"Topic {topic_match.group(1)}-{topic_match.group(2)}"
+            logger.info(f"Retrieval config: k={max_results}, regex matched topic={topic_label}")
+        else:
+            logger.info(f"Retrieval config: k={max_results}, no topic regex match")
+        
+        # Search for relevant document chunks with configured k
         relevant_chunks = await vector_store.search(
             query=request.question,
-            top_k=5
+            top_k=max_results if not topic_match else 10  # Get more results for filtering if topic match
         )
+        
+        # Filter chunks if topic pattern was matched
+        if topic_match:
+            topic_label = f"Topic {topic_match.group(1)}-{topic_match.group(2)}"
+            # Filter to only chunks with matching topic
+            filtered_chunks = []
+            for chunk in relevant_chunks:
+                metadata = chunk.get("metadata", {})
+                if metadata.get("topic") == topic_label:
+                    filtered_chunks.append(chunk)
+            
+            # If we found matching topic chunks, use them; otherwise fall back to top result
+            if filtered_chunks:
+                relevant_chunks = filtered_chunks[:max_results]
+                logger.info(f"Filtered to {len(relevant_chunks)} chunks matching topic={topic_label}")
+            else:
+                # No exact topic match found, use top result anyway
+                relevant_chunks = relevant_chunks[:max_results]
+                logger.info(f"No exact topic match for {topic_label}, using top {max_results} result(s)")
+        else:
+            # No topic pattern, just limit to max_results
+            relevant_chunks = relevant_chunks[:max_results]
         
         if not relevant_chunks:
             logger.warning("No documents found in ChromaDB")
@@ -80,11 +117,12 @@ async def ask_question(request: AskRequest):
             )
         
         # Log retrieved chunks for debugging
-        logger.info(f"Retrieved {len(relevant_chunks)} chunks:")
+        logger.info(f"Retrieved {len(relevant_chunks)} final chunks:")
         for i, chunk in enumerate(relevant_chunks):
             metadata = chunk.get("metadata", {})
             logger.info(f"  Chunk {i+1}: {metadata.get('filename', 'Unknown')} "
                        f"(chunk {metadata.get('chunk_index', 'N/A')}) "
+                       f"topic={metadata.get('topic', 'None')} "
                        f"- distance: {chunk.get('distance', 'N/A')}")
         
         # Construct context from chunks
