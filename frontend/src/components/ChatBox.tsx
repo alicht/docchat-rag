@@ -4,8 +4,10 @@ import { config } from '../config'
 
 interface Source {
   filename: string
-  chunk_index: number
-  distance?: number
+  chunk_id: number
+  score: number
+  preview: string
+  doc_url?: string | null
 }
 
 interface ChatMessage {
@@ -123,19 +125,51 @@ function ChatBox() {
                       
                       {/* Sources */}
                       {message.type === 'ai' && message.sources && message.sources.length > 0 && (
-                        <div className="mt-3 pt-2 border-t border-gray-200">
-                          <p className="text-xs font-semibold text-gray-600 mb-1">Sources:</p>
-                          <div className="space-y-1">
+                        <div className="mt-4">
+                          <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                            <span className="w-4 h-4 mr-2">📄</span>
+                            Sources ({message.sources.length})
+                          </p>
+                          <div className="space-y-3">
                             {message.sources.map((source, index) => (
-                              <div key={index} className="text-xs text-gray-500 flex items-center gap-2">
-                                <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                                <span>{source.filename}</span>
-                                <span className="text-gray-400">chunk {source.chunk_index}</span>
-                                {source.distance !== undefined && (
-                                  <span className="text-gray-400">
-                                    ({(source.distance * 100).toFixed(1)}% match)
+                              <div 
+                                key={index} 
+                                className="bg-gray-50 border border-gray-200 rounded-lg p-3 hover:bg-gray-100 transition-colors duration-200 hover:border-gray-300"
+                              >
+                                <div className="flex items-start justify-between mb-2">
+                                  <div className="flex-1">
+                                    {source.doc_url ? (
+                                      <a 
+                                        href={source.doc_url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="font-semibold text-blue-600 hover:text-blue-800 hover:underline text-sm"
+                                      >
+                                        {source.filename}
+                                      </a>
+                                    ) : (
+                                      <span className="font-semibold text-gray-800 text-sm">
+                                        {source.filename}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
+                                    {source.score.toFixed(1)}% match
                                   </span>
-                                )}
+                                </div>
+                                
+                                <p className="text-xs text-gray-600 leading-relaxed mb-2">
+                                  {source.preview.length > 150 
+                                    ? source.preview.substring(0, 150) + "..." 
+                                    : source.preview
+                                  }
+                                </p>
+                                
+                                <div className="flex items-center text-xs text-gray-400">
+                                  <span className="bg-gray-200 px-2 py-1 rounded text-xs">
+                                    Chunk {source.chunk_id}
+                                  </span>
+                                </div>
                               </div>
                             ))}
                           </div>

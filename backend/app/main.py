@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import List, Optional
 from dotenv import load_dotenv
 import os
 import logging
@@ -23,7 +24,7 @@ llm_service = LLMService()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "http://localhost:5174"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -43,9 +44,16 @@ async def health_check():
 class AskRequest(BaseModel):
     question: str
 
+class Source(BaseModel):
+    filename: str
+    chunk_id: int
+    score: float
+    preview: str
+    doc_url: Optional[str] = None
+
 class AskResponse(BaseModel):
     answer: str
-    sources: list = []
+    sources: List[Source] = []
 
 @app.post("/ask", response_model=AskResponse)
 async def ask_question(request: AskRequest):
@@ -81,13 +89,26 @@ async def ask_question(request: AskRequest):
         sources = []
         
         for chunk in relevant_chunks:
-            context_parts.append(chunk["text"])
+            chunk_text = chunk["text"]
+            context_parts.append(chunk_text)
             metadata = chunk.get("metadata", {})
-            sources.append({
-                "filename": metadata.get("filename", "Unknown"),
-                "chunk_index": metadata.get("chunk_index", 0),
-                "distance": chunk.get("distance")
-            })
+            
+            # Convert distance to similarity score (0-100)
+            distance = chunk.get("distance", 1.0)
+            similarity_score = max(0, (1 - distance) * 100)
+            
+            # Create preview (first ~200 characters)
+            preview = chunk_text[:200].strip()
+            if len(chunk_text) > 200:
+                preview += "..."
+            
+            sources.append(Source(
+                filename=metadata.get("filename", "Unknown"),
+                chunk_id=metadata.get("chunk_index", 0),
+                score=round(similarity_score, 1),
+                preview=preview,
+                doc_url=metadata.get("doc_url")  # Will be None if not set
+            ))
         
         context = "\n\n".join(context_parts)
         
