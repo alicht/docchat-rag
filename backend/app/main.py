@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
@@ -226,3 +226,79 @@ async def upload_document(file: UploadFile = File(...)):
     except Exception as e:
         logger.error(f"Error processing document {file.filename}: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error while processing document")
+
+class TopicItem(BaseModel):
+    filename: str
+    topic: Optional[str] = None
+    page: Optional[int] = None
+    line: Optional[int] = None
+    preview: str
+
+class ListTopicsResponse(BaseModel):
+    topics: List[TopicItem]
+    total: int
+    page: int
+    limit: int
+    has_more: bool
+
+@app.get("/list-topics", response_model=ListTopicsResponse)
+async def list_topics(
+    page: int = Query(default=1, ge=1, description="Page number (starts from 1)"),
+    limit: int = Query(default=50, ge=1, le=100, description="Number of items per page (max 100)")
+):
+    """
+    List all indexed topics with pagination
+    """
+    try:
+        logger.info(f"Listing topics: page={page}, limit={limit}")
+        
+        # Get all chunks from vector store
+        all_chunks = await vector_store.list_all_chunks()
+        
+        # Calculate pagination
+        total = len(all_chunks)
+        start_idx = (page - 1) * limit
+        end_idx = start_idx + limit
+        
+        # Get paginated results
+        paginated_chunks = all_chunks[start_idx:end_idx]
+        
+        # Convert to response format
+        topics = []
+        for chunk in paginated_chunks:
+            metadata = chunk.get("metadata", {})
+            
+            # Create preview (first 150 characters)
+            chunk_text = chunk.get("text", "")
+            preview = chunk_text[:150].strip()
+            if len(chunk_text) > 150:
+                preview += "..."
+            
+            # Convert empty string topics to None
+            topic_value = metadata.get("topic")
+            if topic_value == "":
+                topic_value = None
+                
+            topics.append(TopicItem(
+                filename=metadata.get("filename", "Unknown"),
+                topic=topic_value,
+                page=metadata.get("page") if metadata.get("page") != 0 else None,
+                line=metadata.get("line") if metadata.get("line") != 0 else None,
+                preview=preview
+            ))
+        
+        has_more = end_idx < total
+        
+        logger.info(f"Returning {len(topics)} topics out of {total} total (page {page}/{((total - 1) // limit) + 1})")
+        
+        return ListTopicsResponse(
+            topics=topics,
+            total=total,
+            page=page,
+            limit=limit,
+            has_more=has_more
+        )
+        
+    except Exception as e:
+        logger.error(f"Error listing topics: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error retrieving topics")

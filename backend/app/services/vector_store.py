@@ -319,3 +319,22 @@ class VectorStoreService:
         if ids_to_delete:
             self.collection.delete(ids=ids_to_delete)
             logger.info(f"Deleted {len(ids_to_delete)} chunks for document {document_id}")
+    
+    async def list_all_chunks(self) -> List[Dict[str, Any]]:
+        """
+        Get all chunks with their metadata and text
+        Returns: List of dicts with 'text' and 'metadata' keys
+        """
+        all_data = self.collection.get()
+        
+        chunks = []
+        if all_data['documents']:
+            for i, doc in enumerate(all_data['documents']):
+                chunk = {
+                    "text": doc,
+                    "metadata": all_data['metadatas'][i] if all_data['metadatas'] else {}
+                }
+                chunks.append(chunk)
+        
+        logger.info(f"Retrieved {len(chunks)} total chunks from collection")
+        return chunks
