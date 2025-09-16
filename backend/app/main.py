@@ -47,13 +47,11 @@ class AskRequest(BaseModel):
 
 class Source(BaseModel):
     filename: str
-    chunk_id: int
-    score: float
-    preview: str
+    topic: Optional[str] = None
     page: Optional[int] = None
     line: Optional[int] = None
-    topic: Optional[str] = None
-    doc_url: Optional[str] = None
+    preview: str
+    score: float
 
 class AskResponse(BaseModel):
     answer: str
@@ -138,20 +136,23 @@ async def ask_question(request: AskRequest):
             distance = chunk.get("distance", 1.0)
             similarity_score = max(0, (1 - distance) * 100)
             
-            # Create preview (first ~200 characters)
-            preview = chunk_text[:200].strip()
-            if len(chunk_text) > 200:
+            # Create preview (first 150 characters)
+            preview = chunk_text[:150].strip()
+            if len(chunk_text) > 150:
                 preview += "..."
             
+            # Get topic, convert empty string to None
+            topic_value = metadata.get("topic")
+            if topic_value == "":
+                topic_value = None
+                
             sources.append(Source(
                 filename=metadata.get("filename", "Unknown"),
-                chunk_id=metadata.get("chunk_index", 0),
-                score=round(similarity_score, 1),
+                topic=topic_value,
+                page=metadata.get("page") if metadata.get("page") != 0 else None,
+                line=metadata.get("line") if metadata.get("line") != 0 else None,
                 preview=preview,
-                page=metadata.get("page"),
-                line=metadata.get("line"),
-                topic=metadata.get("topic"),
-                doc_url=metadata.get("doc_url")  # Will be None if not set
+                score=round(similarity_score, 1)
             ))
         
         context = "\n\n".join(context_parts)
