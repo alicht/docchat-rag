@@ -214,7 +214,101 @@ docchat-rag/
 - **UI styling**: Edit Tailwind classes in React components
 - **API base URL**: Update `config.ts` in frontend
 
-## Development
+## Testing
+
+### Test Documents
+
+The project includes comprehensive test PDFs designed to validate the RAG system's fine-grained parsing and topic extraction capabilities:
+
+#### Available Test Documents
+
+1. **`rag_test_pdfs/Mixed_Policies.pdf`** (~20 pages)
+   - **HR Policies**: Employee onboarding, performance reviews, vacation policies, remote work guidelines
+   - **Contract Policies**: Vendor contracts, NDAs, employment modifications, IP assignment
+   - **Real Estate Policies**: Lease management, space allocation, facility maintenance, security
+   - **IT Policies**: Password security, software licensing, data backup, network access
+
+2. **`rag_test_pdfs/Medical_and_Legal.pdf`** (~20 pages)
+   - **Patient Care Guidelines**: Intake procedures, HIPAA compliance, prescription protocols, emergency response
+   - **Legal Contract Standards**: Contract formation, dispute resolution, IP protection, compliance requirements
+
+Each document contains structured **Topic X-Y** entries (e.g., "Topic 1-1: Employee Onboarding Process") optimized for fine-grained parsing and semantic search testing.
+
+### Testing the RAG System
+
+#### 1. Upload Test Documents
+
+```bash
+# Start the application
+npm run dev  # Frontend (localhost:5174)
+uvicorn app.main:app --reload --port 8000  # Backend
+
+# Visit http://localhost:5174
+# Upload one or both test PDFs using the document uploader
+```
+
+#### 2. Test Topic-Specific Queries
+
+The system performs **regex-based topic filtering** for precise retrieval:
+
+```bash
+# Direct topic queries (exact matches)
+"Topic 1-1"  # Returns specific Employee Onboarding content
+"Topic 5-2"  # Returns Service Level Agreement standards
+"Topic 13-1" # Returns Password Security Requirements
+
+# Semantic queries (content-based search)
+"What are the password requirements?"
+"Tell me about vacation policies"
+"How should contracts handle force majeure?"
+"What are the patient privacy rules?"
+```
+
+#### 3. Browse All Topics
+
+Use the **TopicBrowser sidebar** to explore indexed content:
+- Click the hamburger menu (☰) to open the topic browser
+- Scroll through all indexed topics with metadata
+- Click any topic to preview content snippet
+- Use for discovery before asking specific questions
+
+#### 4. API Testing
+
+```bash
+# Direct API calls for testing
+curl -X POST "http://localhost:8000/upload-doc" \
+  -F "file=@rag_test_pdfs/Mixed_Policies.pdf"
+
+curl -X POST "http://localhost:8000/ask" \
+  -H "Content-Type: application/json" \
+  -d '{"question": "Topic 1-1"}'
+
+# Browse all topics with pagination
+curl "http://localhost:8000/list-topics?page=1&limit=20"
+```
+
+#### 5. Expected Results
+
+- **Fine-grained parsing**: Each "Topic X-Y" becomes a separate searchable chunk
+- **Metadata enrichment**: Page numbers, line numbers, topic labels in search results
+- **Precise retrieval**: Topic queries return exact matches with high relevance scores
+- **Source attribution**: Responses include filename, topic, page/line references
+
+### Performance Validation
+
+Test with different configurations by setting environment variables:
+
+```bash
+# Test with different retrieval amounts
+export MAX_RESULTS=1  # Default: focused answers
+export MAX_RESULTS=3  # More comprehensive context
+export MAX_RESULTS=5  # Maximum context for complex queries
+
+# Restart backend to apply changes
+uvicorn app.main:app --reload --port 8000
+```
+
+### Development
 
 ### Running Tests
 
