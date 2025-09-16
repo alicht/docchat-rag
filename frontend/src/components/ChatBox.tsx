@@ -7,6 +7,9 @@ interface Source {
   chunk_id: number
   score: number
   preview: string
+  page?: number | null
+  line?: number | null
+  topic?: string | null
   doc_url?: string | null
 }
 
@@ -138,6 +141,15 @@ function ChatBox() {
                               >
                                 <div className="flex items-start justify-between mb-2">
                                   <div className="flex-1">
+                                    {/* Topic label if available */}
+                                    {source.topic && (
+                                      <div className="mb-1">
+                                        <span className="text-sm font-bold text-indigo-600">
+                                          {source.topic}
+                                        </span>
+                                      </div>
+                                    )}
+                                    
                                     {source.doc_url ? (
                                       <a 
                                         href={source.doc_url} 
@@ -152,6 +164,15 @@ function ChatBox() {
                                         {source.filename}
                                       </span>
                                     )}
+                                    
+                                    {/* Page and line info if available */}
+                                    {(source.page || source.line) && (
+                                      <div className="text-xs text-gray-500 mt-1">
+                                        {source.page && <span>Page {source.page}</span>}
+                                        {source.page && source.line && <span>, </span>}
+                                        {source.line && <span>Line {source.line}</span>}
+                                      </div>
+                                    )}
                                   </div>
                                   <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
                                     {source.score.toFixed(1)}% match
@@ -165,10 +186,15 @@ function ChatBox() {
                                   }
                                 </p>
                                 
-                                <div className="flex items-center text-xs text-gray-400">
+                                <div className="flex items-center gap-2 text-xs text-gray-400">
                                   <span className="bg-gray-200 px-2 py-1 rounded text-xs">
                                     Chunk {source.chunk_id}
                                   </span>
+                                  {source.topic && (
+                                    <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs">
+                                      Topic Reference
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             ))}

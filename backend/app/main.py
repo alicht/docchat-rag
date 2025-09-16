@@ -49,6 +49,9 @@ class Source(BaseModel):
     chunk_id: int
     score: float
     preview: str
+    page: Optional[int] = None
+    line: Optional[int] = None
+    topic: Optional[str] = None
     doc_url: Optional[str] = None
 
 class AskResponse(BaseModel):
@@ -107,6 +110,9 @@ async def ask_question(request: AskRequest):
                 chunk_id=metadata.get("chunk_index", 0),
                 score=round(similarity_score, 1),
                 preview=preview,
+                page=metadata.get("page"),
+                line=metadata.get("line"),
+                topic=metadata.get("topic"),
                 doc_url=metadata.get("doc_url")  # Will be None if not set
             ))
         
