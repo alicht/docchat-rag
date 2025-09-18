@@ -89,7 +89,7 @@ function DocumentUploader() {
         fileInputRef.current.value = ''
       }
 
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Upload error:', error)
       
       if (axios.isAxiosError(error)) {

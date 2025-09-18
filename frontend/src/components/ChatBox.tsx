@@ -44,7 +44,7 @@ function ChatBox() {
     setMessages(prev => [...prev, newMessage])
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     
     if (!input.trim() || loading) return
@@ -65,14 +65,18 @@ function ChatBox() {
       // Add AI response
       addMessage('ai', response.data.answer, response.data.sources)
       
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error calling API:', err)
       
       // Handle different error scenarios
-      if (axios.isAxiosError(err) && err.response?.status === 500) {
-        addMessage('ai', 'Sorry, I encountered an error while processing your question. Please make sure the backend is running and configured properly.')
-      } else if (axios.isAxiosError(err) && err.code === 'ECONNREFUSED') {
-        addMessage('ai', 'Cannot connect to the backend server. Please make sure it is running on localhost:8000.')
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status === 500) {
+          addMessage('ai', 'Sorry, I encountered an error while processing your question. Please make sure the backend is running and configured properly.')
+        } else if (err.code === 'ECONNREFUSED') {
+          addMessage('ai', 'Cannot connect to the backend server. Please make sure it is running on localhost:8000.')
+        } else {
+          addMessage('ai', 'Server error occurred. Please try again later.')
+        }
       } else {
         addMessage('ai', 'Something went wrong. Please try again later.')
       }
@@ -221,7 +225,7 @@ function ChatBox() {
               <input
                 type="text"
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
                 placeholder="Ask a question about your documents..."
                 className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 disabled={loading}

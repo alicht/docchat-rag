@@ -31,7 +31,7 @@ function DocumentUpload({ onUploadSuccess }: DocumentUploadProps) {
       onUploadSuccess()
       
       setTimeout(() => setMessage(''), 3000)
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Upload error:', error)
       setMessage('Error uploading document. Please try again.')
     } finally {
@@ -51,7 +51,7 @@ function DocumentUpload({ onUploadSuccess }: DocumentUploadProps) {
           <input
             type="file"
             accept=".txt,.md"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFile(e.target.files?.[0] || null)}
             className="block w-full text-sm text-gray-500
               file:mr-4 file:py-2 file:px-4
               file:rounded-lg file:border-0

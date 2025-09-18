@@ -51,7 +51,7 @@ const TopicBrowser: React.FC<TopicBrowserProps> = ({ isOpen, onToggle }) => {
       
       setHasMore(data.has_more)
       setPage(pageNum)
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load topics')
     } finally {
       setLoading(false)
